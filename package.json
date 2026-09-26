@@ -1,0 +1,44 @@
+{
+  "name": "@eagle4302/pi-recap",
+  "version": "0.1.0",
+  "description": "Grok-style recap block after every exchange for the pi coding agent: a cheap model writes a 2-4 line status summary at the end of each reply.",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "recap",
+    "summary",
+    "grok"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eagle4302/pi-recap.git"
+  },
+  "type": "module",
+  "files": [
+    "extensions",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions/recap.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
+  "scripts": {
+    "test": "node test/smoke.mjs",
+    "verify": "node scripts/verify.mjs",
+    "prepublishOnly": "node scripts/verify.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
