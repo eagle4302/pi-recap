@@ -1,6 +1,6 @@
 {
   "name": "@eagle4302/pi-recap",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Grok-style recap block after every exchange for the pi coding agent: a cheap model writes a 2-4 line status summary at the end of each reply.",
   "keywords": [
     "pi-package",

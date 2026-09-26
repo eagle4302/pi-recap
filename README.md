@@ -4,12 +4,13 @@ A Grok-style **recap block** appended to the end of every reply in the [pi codin
 
 ```
 Recap · openai/gpt-5-mini
-- Fixed the null deref in lib/router.ts:88 by guarding on the session token.
-- Added test/smoke.mjs coverage for the queued-run path (24 tests, all green).
-- Still open: /recap on|off is not persisted across restarts.
+- Fixed the crash when you switch sessions in the middle of a reply.
+- Tests all pass (24) and the new version is published.
+- Still open: the on/off setting is not remembered.
 ```
 
-Each exchange gets its own block at the end of the transcript, written by a
+The recap is two or three plain-language lines: what happened, and what is still
+open. Each exchange gets its own block at the end of the transcript, written by a
 cheap model in the background. It reads like part of the conversation, and
 because it is a **custom entry** it never enters the LLM context — the main
 model's prompt stays exactly as it would be without this extension.

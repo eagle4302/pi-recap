@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- The recap prompt now asks for a plainer, shorter block: two or three lines, one
+  idea per line, everyday words, and file names or numbers only when they are the
+  point. No functional change.
+
 ## 0.1.0
 
 - Initial release: a Grok-style recap block at the end of every exchange.

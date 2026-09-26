@@ -1,0 +1,52 @@
+name: publish
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+# Trusted publishing: npm exchanges this OIDC token for a short-lived publish
+# token, so no NPM_TOKEN secret is stored anywhere. Two things must be true on
+# npmjs.com for this to work (package -> Settings -> Trusted publishing):
+#
+#   Organization or user:  eagle4302
+#   Repository:            pi-recap
+#   Workflow filename:     publish.yml
+#   Allowed actions:       npm publish      <- must be ticked, publish.yml is not
+#                                              enough on its own
+#
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: The tag must match the version in package.json
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package.json version $version"
+            exit 1
+          fi
+
+      # npm publish would install these anyway; the verifier and the smoke test
+      # need the real pi-tui and pi's bundled jiti. --no-save keeps package.json
+      # (and any lockfile) untouched.
+      - name: Install pi for the verifier
+        run: npm install --no-save --no-audit --no-fund @earendil-works/pi-coding-agent @earendil-works/pi-tui
+
+      - name: Verify
+        run: npm run verify
+
+      - name: Publish
+        run: npm publish --access public
