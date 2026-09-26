@@ -3,10 +3,10 @@
 A Grok-style **recap block** appended to the end of every reply in the [pi coding agent](https://pi.dev).
 
 ```
-⏺ Recap · deepseek/deepseek-flash
-  - Fixed the null deref in lib/router.ts:88 by guarding on the session token.
-  - Added test/smoke.mjs coverage for the queued-run path (24 tests, all green).
-  - Still open: /recap on|off is not persisted across restarts.
+Recap · openai/gpt-5-mini
+- Fixed the null deref in lib/router.ts:88 by guarding on the session token.
+- Added test/smoke.mjs coverage for the queued-run path (24 tests, all green).
+- Still open: /recap on|off is not persisted across restarts.
 ```
 
 Each exchange gets its own block at the end of the transcript, written by a
