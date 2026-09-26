@@ -184,7 +184,9 @@ check("npm pack ships exactly the intended files", () => {
 const PRIVATE_PATTERNS = [
 	{ pattern: /C:\\+Users\\+/i, label: "absolute Windows user path" },
 	{ pattern: /\bAdministrator\b/, label: "local machine account name" },
-	{ pattern: /matianwen|eagle4302/i, label: "personal identifier" },
+	{ pattern: /matianwen/i, label: "personal identifier" },
+	// The npm scope and the GitHub owner are public by design, so "eagle4302"
+	// itself is allowed; the private address that goes with it is not.
 	{ pattern: /hotmail|gmail\.com|yahoo\.com/i, label: "personal email address" },
 	{ pattern: /\/(?:Users|home)\/[A-Za-z0-9._-]+\//, label: "absolute POSIX home path" },
 	{ pattern: /npm_[A-Za-z0-9]{20,}/, label: "npm access token" },
@@ -330,9 +332,9 @@ console.log(`\n${results.length - failed.length}/${results.length} checks passed
 
 if (failed.length > 0) {
 	console.log("Fix the failing checks before publishing.\n");
-	process.exit(1);
-}
-
+	// Not process.exit(): an open fetch socket would be torn down mid-close.
+	process.exitCode = 1;
+} else {
 console.log(
 	[
 		"Ready to publish. Manual steps (this script never publishes):",
@@ -350,3 +352,4 @@ console.log(
 		"",
 	].join("\n"),
 );
+}
