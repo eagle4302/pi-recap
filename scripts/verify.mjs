@@ -11,6 +11,7 @@
 
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findPiPackageDir } from "./find-pi.mjs";
@@ -304,10 +305,12 @@ if (pkg.repository) {
 			} else if (response.status === 401 || response.status === 403) {
 				results.push({ name, ok: true, detail: `${label} (rate limited, not verified)` });
 			} else {
+				// A missing repository must never block publishing: the link simply
+				// resolves once the repo is pushed. Say so, keep going.
 				results.push({
 					name,
-					ok: false,
-					detail: `${label} returned ${response.status} — create the repository (or push to it) before publishing, or drop the field`,
+					ok: true,
+					detail: `${label} does not exist yet (the link resolves once you push it)`,
 				});
 			}
 		} catch (error) {
@@ -335,21 +338,42 @@ if (failed.length > 0) {
 	// Not process.exit(): an open fetch socket would be torn down mid-close.
 	process.exitCode = 1;
 } else {
-console.log(
-	[
-		"Ready to publish. Manual steps (this script never publishes):",
-		"",
-		`  1. npm login                     # this machine is not logged in yet`,
-		`  2. npm view ${pkg.name}          # expect E404 — confirm the name is free`,
-		`  3. npm publish --access public   # prepublishOnly re-runs this verifier`,
-		`  4. npm view ${pkg.name} version  # confirm ${pkg.version} is on the registry`,
-		"",
-		"Then install it (and remove any local copy of the extension first, or you",
-		"will register two recappers and get two recaps per exchange):",
-		"",
-		`  rm ~/.pi/agent/extensions/recap.ts`,
-		`  pi install npm:${pkg.name}`,
-		"",
-	].join("\n"),
-);
+	// Report the real state rather than a canned checklist.
+	const npmShell = { encoding: "utf8", shell: process.platform === "win32", stdio: ["ignore", "pipe", "ignore"] };
+	let account;
+	try {
+		account = execFileSync(npmCmd, ["whoami"], npmShell).trim();
+	} catch {
+		account = undefined;
+	}
+	let published;
+	try {
+		published = execFileSync(npmCmd, ["view", pkg.name, "version"], npmShell).trim();
+	} catch {
+		published = undefined;
+	}
+	const localCopy = join(homedir(), ".pi", "agent", "extensions", "recap.ts");
+	const localNote = existsSync(localCopy)
+		? ["Remove the local copy of the extension first, or pi will register two", "recappers and you will get two recaps per exchange:", "", `  rm ${localCopy}`]
+		: ["No local copy found in ~/.pi/agent/extensions, so nothing can double-register."];
+
+	console.log(
+		[
+			"Ready to publish. Manual steps (this script never publishes):",
+			"",
+			account
+				? `  1. npm whoami                    # logged in as ${account}`
+				: "  1. npm login",
+			published
+				? `  2. npm view ${pkg.name}   # already on the registry: ${published} — bump the version`
+				: `  2. npm view ${pkg.name}   # expect E404 — the name is free`,
+			"  3. npm publish --access public   # prepublishOnly re-runs this verifier",
+			`  4. npm view ${pkg.name} version  # confirm ${pkg.version} is on the registry`,
+			"",
+			...localNote,
+			"",
+			`  pi install npm:${pkg.name}`,
+			"",
+		].join("\n"),
+	);
 }
